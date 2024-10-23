@@ -11,7 +11,8 @@
 		}
 	],
 	"require": {
-		"laravel/framework": "10.*"
+		"laravel/framework": "10.*",
+		"vanacode/support": "*"
 	},
 	"suggest": {
 		"vanacode/helpers": "Useful functions"
