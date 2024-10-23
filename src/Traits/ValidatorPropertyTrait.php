@@ -94,7 +94,7 @@ trait ValidatorPropertyTrait
      *
      * @throws DynamicClassPropertyException
      */
-    protected function makeValidator(string $validatorClass = '', array $data = []): Validator
+    public function makeValidator(string $validatorClass = '', array $data = []): Validator
     {
         $validatorClass = $validatorClass ?: $this->validatorClass();
         if (! array_key_exists('default', $data)) {
@@ -104,12 +104,12 @@ trait ValidatorPropertyTrait
         return $this->makePropertyInstance('validator', $validatorClass, 'Validators', 'Validator', $data);
     }
 
-    protected function validatorClass(): string
+    public function validatorClass(): string
     {
         return Validator::class;
     }
 
-    protected function validatorModelClass(): string
+    public function validatorModelClass(): string
     {
         return $this->validator->modelClass();
     }
