@@ -32,7 +32,7 @@ trait ValidatorPropertyTrait
             return $this;
         }
 
-        $modelClass = $data['model_class'] ?: $this->validatorModelClass();
+        $modelClass = $data['model_class'] ?? $this->validatorModelClass();
         $model = $this->getModelBy($modelClass, $data['model_data'] ?? []);
         if ($model) {
             $this->validator->setModel($model);
@@ -52,7 +52,7 @@ trait ValidatorPropertyTrait
     {
         $this->setValidatorBy($validator, $validatorClass, $data);
 
-        $modelClass = $data['model_class'] ?: $this->validatorModelClass();
+        $modelClass = $data['model_class'] ?? $this->validatorModelClass();
         $model = $this->getModelBy($modelClass, $data['model_data'] ?? []);
 
         if ($model) {
