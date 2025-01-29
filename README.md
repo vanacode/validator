@@ -1,3 +1,3 @@
 @TODO
 
-composer update vanacode/validator
+composer require vanacode/validator

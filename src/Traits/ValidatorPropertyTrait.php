@@ -2,58 +2,28 @@
 
 namespace Vanacode\Validator\Traits;
 
-use Vanacode\Support\Exceptions\DynamicClassPropertyException;
 use Vanacode\Validator\Validator;
 
+/**
+ * use with Vanacode\Support\Traits\DynamicClassTrait
+ */
 trait ValidatorPropertyTrait
 {
     protected Validator $validator;
 
-    protected bool $overSetValidator = true;
-
     /**
-     * if $validator argument is null based $validatorClass argument or validatorClass() method dynamically make validator
-     * then set $validator property
-     * if $overSetValidator property is true then reset validator $model property by dynamic model match
-     * if $overSetValidator property is false and $model property is not set yet in $validator property,
-     * then set validator $model property by dynamic model match
+     * initialize validator property with own model property
      *
-     * @throws DynamicClassPropertyException
+     * if $validator argument is null, make validator instance dynamically based caller sub folders first match
+     * Set validator property
+     * set validator $model property by caller $model property if it set,
+     * otherwise make model instance dynamically based caller sub folders first match and then set it to validator
      */
-    public function initializeValidator(?Validator $validator = null, string $validatorClass = '', array $data = []): self
+    public function initializeValidator(?Validator $validator = null, array $data = []): self
     {
-        if ($this->overSetValidator) {
-            return $this->initializeValidatorAndOverSet($validator, $validatorClass, $data);
-        }
+        $this->setValidatorBy($validator, $data);
 
-        $this->setValidatorBy($validator, $validatorClass, $data);
-
-        if ($this->validator->isSetModel()) {
-            return $this;
-        }
-
-        $modelClass = $data['model_class'] ?? $this->validatorModelClass();
-        $model = $this->getModelBy($modelClass, $data['model_data'] ?? []);
-        if ($model) {
-            $this->validator->setModel($model);
-        }
-
-        return $this;
-    }
-
-    /**
-     * if $validator argument is null based $validatorClass argument or validatorClass() method dynamically make validator
-     * then set $validator property
-     * reset validator $model property by dynamic model match
-     *
-     * @throws DynamicClassPropertyException
-     */
-    public function initializeValidatorAndOverSet(?Validator $validator = null, string $validatorClass = '', array $data = []): self
-    {
-        $this->setValidatorBy($validator, $validatorClass, $data);
-
-        $modelClass = $data['model_class'] ?? $this->validatorModelClass();
-        $model = $this->getModelBy($modelClass, $data['model_data'] ?? []);
+        $model = $this->getModelBy($data['model_data'] ?? []);
 
         if ($model) {
             $this->validator->setModel($model);
@@ -70,16 +40,14 @@ trait ValidatorPropertyTrait
     }
 
     /**
-     * if validator argument is null based $validatorClass argument or validatorClass() method dynamically make validator
-     * then set $validator property
+     * Set validator property
      *
-     * @throws DynamicClassPropertyException
+     * if $validator argument is not null
+     * otherwise make validator instance dynamically based caller sub folders first match and set it
      */
-    public function setValidatorBy(?Validator $validator, string $validatorClass = '', array $data = []): self
+    public function setValidatorBy(?Validator $validator, array $data = []): self
     {
-        if (is_null($validator)) {
-            $validator = $this->makeValidator($validatorClass, $data);
-        }
+        $validator = $validator ?? $this->makeValidator($data);
 
         return $this->setValidator($validator);
     }
@@ -90,27 +58,22 @@ trait ValidatorPropertyTrait
     }
 
     /**
-     * based $validatorClass argument or validatorClass() method dynamically make validator
-     *
-     * @throws DynamicClassPropertyException
+     * make validator instance dynamically based caller sub folders first match
      */
-    public function makeValidator(string $validatorClass = '', array $data = []): Validator
+    public function makeValidator(array $data = []): Validator
     {
-        $validatorClass = $validatorClass ?: $this->validatorClass();
         if (! array_key_exists('default', $data)) {
-            $data['default'] = $validatorClass;
+            $data['default'] = static::validatorClass();
         }
 
-        return $this->makePropertyInstance('validator', $validatorClass, 'Validators', 'Validator', $data);
+        return $this->makeClassDynamically('Validators', 'Validator', $data);
     }
 
-    public function validatorClass(): string
+    /**
+     * Default validator class
+     */
+    public static function validatorClass(): string
     {
         return Validator::class;
-    }
-
-    public function validatorModelClass(): string
-    {
-        return $this->validator->modelClass();
     }
 }
